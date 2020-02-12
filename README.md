@@ -1,6 +1,5 @@
 # Customized Universal Installer 
- 
-    This repository walks through the steps for installing a DC/OS cluter using universal installer in a environment where you cannot create a VPC. the default installation of DC/OS using universal installer works under the pretense that it would be able to create VPC's and everything within a VPC before actual DC/OS installation is initiated. This also means that a VPC is dedicated only for DC/OS installation. Often we run into team's that do not have privileges to create VPC and will need to work with existing VPC's & Subnets at minimum. This means that instead of installer randomly picking subnets we would need to control which sunets they fall under as well. This repo also assume that you are faimiliar with standard AWS terminology 
+This repository walks through the steps for installing a DC/OS cluter using universal installer in a environment where you cannot create a VPC. the default installation of DC/OS using universal installer works under the pretense that it would be able to create VPC's and everything within a VPC before actual DC/OS installation is initiated. This also means that a VPC is dedicated only for DC/OS installation. Often we run into team's that do not have privileges to create VPC and will need to work with existing VPC's & Subnets at minimum. This means that instead of installer randomly picking subnets we would need to control which sunets they fall under as well. This repo also assume that you are faimiliar with standard AWS terminology 
 
 ## Prequisites
 
