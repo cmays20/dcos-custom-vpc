@@ -51,8 +51,8 @@ module "dcos-security-groups" {
     aws = "aws"
   }
 
-  vpc_id                         = "${module.dcos-vpc.vpc_id}"
-  subnet_range                   = "${var.subnet_range}"
+  vpc_id                         = "${local.vpc_id}"
+  subnet_range                   = "${local.subnet_range}"
   cluster_name                   = "${var.cluster_name}"
   admin_ips                      = ["${var.admin_ips}"]
   public_agents_access_ips       = ["${var.public_agents_access_ips}"]
