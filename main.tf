@@ -191,7 +191,7 @@ module "dcos-lb" {
 
   internal                           = true
   cluster_name                       = "${var.cluster_name}"
-  subnet_ids                         = ["${module.dcos-vpc.subnet_ids}"]
+  subnet_ids                         = ["${data.aws_subnet_ids.default_subnets.ids}"]
   security_groups_masters            = ["${list(module.dcos-security-groups.admin,module.dcos-security-groups.internal)}"]
   security_groups_masters_internal   = ["${list(module.dcos-security-groups.internal)}"]
   security_groups_public_agents      = ["${list(module.dcos-security-groups.internal, module.dcos-security-groups.admin)}"]
