@@ -42,22 +42,30 @@ locals {
 }
 // Firewall. Create policies for instances and load balancers.
 // https://registry.terraform.io/modules/dcos-terraform/security-groups/aws
+// Firewall. Create policies for instances and load balancers
 module "dcos-security-groups" {
   source  = "dcos-terraform/security-groups/aws"
   version = "~> 0.2.0"
+
   providers = {
     aws = "aws"
   }
-  vpc_id       = "${local.vpc_id}"
-  subnet_range = "${local.subnet_range}"
-  cluster_name = "${var.cluster_name}"
-  admin_ips    = ["${var.admin_ips}"]
+
+  vpc_id                         = "${module.dcos-vpc.vpc_id}"
+  subnet_range                   = "${var.subnet_range}"
+  cluster_name                   = "${var.cluster_name}"
+  admin_ips                      = ["${var.admin_ips}"]
+  public_agents_access_ips       = ["${var.public_agents_access_ips}"]
+  public_agents_additional_ports = ["${var.public_agents_additional_ports}"]
+  public_agents_access_ips       = ["${var.public_agents_access_ips}"]
+  accepted_internal_networks     = ["${var.accepted_internal_networks}"]
 }
 // we use intermediate local variables. So whenever it is needed to replace
 // or drop a modules it is easier to change just the local variable instead
 // of all other references
 locals {
   instance_security_groups             = ["${list(module.dcos-security-groups.internal, module.dcos-security-groups.admin)}"]
+  public_security_groups               = ["${list(module.dcos-security-groups.internal, module.dcos-security-groups.admin, module.dcos-security-groups.public_agents)}"]
   security_groups_elb_masters          = ["${list(module.dcos-security-groups.admin,module.dcos-security-groups.internal)}"]
   security_groups_elb_masters_internal = ["${list(module.dcos-security-groups.internal)}"]
   security_groups_elb_public_agents    = ["${list(module.dcos-security-groups.admin,module.dcos-security-groups.internal)}"]
@@ -134,7 +142,7 @@ module "dcos-publicagent-instances" {
   }
   cluster_name = "${var.cluster_name}"
   aws_subnet_ids         = ["${local.subnet_ids}"]
-  aws_security_group_ids = ["${local.instance_security_groups}"]
+  aws_security_group_ids = ["${local.public_security_groups}"]
   aws_key_name           = "${local.key_name}"
   aws_instance_type      = "m4.large"
   num_public_agents = "${var.num_public_agents}"
@@ -176,20 +184,29 @@ locals {
 module "dcos-lb" {
   source  = "dcos-terraform/lb-dcos/aws"
   version = "~> 0.2.0"
+
   providers = {
     aws = "aws"
   }
-  cluster_name = "${var.cluster_name}"
-  subnet_ids   = ["${data.aws_subnet_ids.default_subnets.ids}"]
-  security_groups_masters          = ["${local.security_groups_elb_masters}"]
-  security_groups_masters_internal = ["${local.security_groups_elb_masters_internal}"]
-  security_groups_public_agents    = ["${local.security_groups_elb_public_agents}"]
-  internal = true
-  master_instances       = ["${module.dcos-master-instances.instances}"]
-  public_agent_instances = ["${module.dcos-publicagent-instances.instances}"]
-  num_masters       = "${var.num_masters}"
-  num_public_agents = "${var.num_public_agents}"
-  tags = "${var.tags}"
+
+  internal                           = true
+  cluster_name                       = "${var.cluster_name}"
+  subnet_ids                         = ["${module.dcos-vpc.subnet_ids}"]
+  security_groups_masters            = ["${list(module.dcos-security-groups.admin,module.dcos-security-groups.internal)}"]
+  security_groups_masters_internal   = ["${list(module.dcos-security-groups.internal)}"]
+  security_groups_public_agents      = ["${list(module.dcos-security-groups.internal, module.dcos-security-groups.admin)}"]
+  master_instances                   = ["${module.dcos-master-instances.instances}"]
+  num_masters                        = "${var.num_masters}"
+  num_public_agents                  = "${var.num_public_agents}"
+  public_agent_instances             = ["${module.dcos-publicagent-instances.instances}"]
+  public_agents_additional_listeners = ["${data.null_data_source.lb_rules.*.outputs}"]
+  name_prefix                        = "${var.name_prefix}"
+  disable_masters                    = "${var.lb_disable_masters}"
+  disable_public_agents              = "${var.lb_disable_public_agents}"
+  masters_acm_cert_arn               = "${var.masters_acm_cert_arn}"
+  masters_internal_acm_cert_arn      = "${var.masters_internal_acm_cert_arn}"
+  public_agents_acm_cert_arn         = "${var.public_agents_acm_cert_arn}"
+  tags                               = "${var.tags}"
 }
 // we use intermediate local variables. So whenever it is needed to replace
 // or drop a modules it is easier to change just the local variable instead
