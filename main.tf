@@ -40,6 +40,15 @@ locals {
   subnet_range = "${data.aws_vpc.default.cidr_block}"
   subnet_ids   = ["${data.aws_subnet_ids.default_subnets.ids}"]
 }
+  
+data "null_data_source" "lb_rules" {
+  count = "${length(var.public_agents_additional_ports)}"
+
+  inputs = {
+    port     = "${element(var.public_agents_additional_ports, count.index)}"
+    protocol = "tcp"
+  }
+}
 // Firewall. Create policies for instances and load balancers.
 // https://registry.terraform.io/modules/dcos-terraform/security-groups/aws
 // Firewall. Create policies for instances and load balancers
@@ -55,10 +64,7 @@ module "dcos-security-groups" {
   subnet_range                   = "${local.subnet_range}"
   cluster_name                   = "${var.cluster_name}"
   admin_ips                      = ["${var.admin_ips}"]
-  public_agents_access_ips       = ["${var.public_agents_access_ips}"]
   public_agents_additional_ports = ["${var.public_agents_additional_ports}"]
-  public_agents_access_ips       = ["${var.public_agents_access_ips}"]
-  accepted_internal_networks     = ["${var.accepted_internal_networks}"]
 }
 // we use intermediate local variables. So whenever it is needed to replace
 // or drop a modules it is easier to change just the local variable instead
@@ -200,12 +206,6 @@ module "dcos-lb" {
   num_public_agents                  = "${var.num_public_agents}"
   public_agent_instances             = ["${module.dcos-publicagent-instances.instances}"]
   public_agents_additional_listeners = ["${data.null_data_source.lb_rules.*.outputs}"]
-  name_prefix                        = "${var.name_prefix}"
-  disable_masters                    = "${var.lb_disable_masters}"
-  disable_public_agents              = "${var.lb_disable_public_agents}"
-  masters_acm_cert_arn               = "${var.masters_acm_cert_arn}"
-  masters_internal_acm_cert_arn      = "${var.masters_internal_acm_cert_arn}"
-  public_agents_acm_cert_arn         = "${var.public_agents_acm_cert_arn}"
   tags                               = "${var.tags}"
 }
 // we use intermediate local variables. So whenever it is needed to replace
