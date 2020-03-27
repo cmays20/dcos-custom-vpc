@@ -68,6 +68,11 @@ variable "public_agents_additional_ports" {
   default = []
 }
 
+variable "os_user" {
+  description = "os user to be used for the install"
+  default = "centos"
+}
+
 ////////////////////////////////////////////
 /////////////// END VARIABLES //////////////
 ////////////////////////////////////////////
