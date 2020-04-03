@@ -161,17 +161,17 @@ module "dcos-publicagent-instances" {
 locals {
   bootstrap_ip         = "${module.dcos-bootstrap-instance.public_ip}"
   bootstrap_private_ip = "${module.dcos-bootstrap-instance.private_ip}"
-  bootstrap_os_user    = "${module.dcos-bootstrap-instance.os_user}"
+  bootstrap_os_user    = "${var.os_user}"
   master_ips         = ["${module.dcos-master-instances.public_ips}"]
   master_private_ips = ["${module.dcos-master-instances.private_ips}"]
-  masters_os_user    = "${module.dcos-master-instances.os_user}"
+  masters_os_user    = "${var.os_user}"
   master_instances   = ["${module.dcos-master-instances.instances}"]
   private_agent_ips         = ["${module.dcos-privateagent-instances.public_ips}"]
   private_agent_private_ips = ["${module.dcos-privateagent-instances.private_ips}"]
-  private_agents_os_user    = "${module.dcos-privateagent-instances.os_user}"
+  private_agents_os_user    = "${var.os_user}"
   public_agent_ips         = ["${module.dcos-publicagent-instances.public_ips}"]
   public_agent_private_ips = ["${module.dcos-publicagent-instances.private_ips}"]
-  public_agents_os_user    = "${module.dcos-publicagent-instances.os_user}"
+  public_agents_os_user    = "${var.os_user}"
   public_agent_instances   = ["${module.dcos-publicagent-instances.instances}"]
 }
 // Load balancers is providing three load balancers.
